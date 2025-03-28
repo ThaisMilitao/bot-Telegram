@@ -1,0 +1,1682 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "inline_query",
+          "*",
+          "callback_query",
+          "poll"
+        ],
+        "additionalFields": {}
+      },
+      "id": "89f856cf-b6f9-4cbc-b282-21f79550619a",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        980,
+        180
+      ],
+      "webhookId": "7587341c-206f-480f-8ee5-bb4e2a795f9e",
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c373d500-0c17-400e-9a65-f948f8296978",
+              "leftValue": "={{$json['message']['text']}}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "1dcb9443-966a-4449-9c33-6a425eaa1e60",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1220,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json['message']['chat']['id']}}",
+        "text": "=Olá {{$json['message']['chat']['first_name']}}  {{$json['message']['chat']['last_name']}}, bem vindo a sua assistente virtual!\nComo posso te ajudar!?",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Injetar texto no doc",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Injetar texto no doc"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Injetar texto e imagem no doc",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Injetar texto e imagem no doc"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Pegar notícias do g1 ",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Pegar notícias do g1 "
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Transcritor de audio",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Transcritor de áudio"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "201b997c-6bdd-4fa0-8faa-b4d119bc8653",
+      "name": "bemvindo_opcoes",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1900,
+        -60
+      ],
+      "notesInFlow": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "=GET",
+        "url": "https://r.jina.ai/https://g1.globo.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Return-Format",
+              "value": "html"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6445540-04d1-4ab2-8941-d808a35847f7",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "link_materia_capa",
+              "cssSelector": "div._evg div.bstn-hl-wrapper a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            },
+            {
+              "key": "titulo_materia_capa",
+              "cssSelector": "div._evg div.bstn-hl-wrapper a ul div._evt span",
+              "returnArray": true
+            },
+            {
+              "key": "titulo_materia",
+              "cssSelector": "div._evt h2 a",
+              "returnArray": true
+            },
+            {
+              "key": "link_materia",
+              "cssSelector": "div._evt h2 a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            },
+            {
+              "key": "t",
+              "cssSelector": "div._evg div.bstn-hl-wrapper",
+              "returnValue": "html"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9c207c32-3ff5-437c-b300-5afd15ec9d42",
+      "name": "HTML",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        2560,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Qual texto você deseja injetar no doc? \n**Inicie o texto com a palavra 'INJETEDOC'",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "2dcc415b-ba72-4b1d-8a9c-33aaec8c5b2d",
+      "name": "pedir_texto",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2300,
+        80
+      ],
+      "notesInFlow": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Qual texto e imagem você deseja injetar no doc? \n**Coloque o texto na legenda e inicie com 'INJETEDOC'",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e2135bdf-f7d6-494d-abf5-a06e23f48bd9",
+      "name": "pedir_txt_img",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2300,
+        240
+      ],
+      "notesInFlow": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Qual audio voce gostaria de transcrever?",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "9963fe37-58d3-4e64-a7b4-24a2a71f11d5",
+      "name": "pedir_audio",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2280,
+        600
+      ],
+      "notesInFlow": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.voice.file_id }}{{ $json.message.audio.file_id }}"
+      },
+      "id": "1a9154b2-5036-429e-8773-d8cf3eff1ef8",
+      "name": "Telegram1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2420,
+        760
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.gladia.io/v2/pre-recorded",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-gladia-key",
+              "value": "467794ae-6296-4b65-96f4-4e4c14ec6c3c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=    {\"audio_url\": \"https://api.telegram.org/file/bot7764363446:AAGxkyNZCJ9YRqjVd3jMQAMdNS8HBDRAfrs/{{ $json.result.file_path }}\",\n    \"diarization\": true,\n    \"diarization_config\": {\n      \"number_of_speakers\": 3,\n      \"min_speakers\": 1,\n      \"max_speakers\": 5\n    },\n    \"translation\": true,\n    \"translation_config\": {\n      \"model\": \"base\",\n      \"target_languages\": [\"fr\", \"en\"]\n    },\n    \"subtitles\": true,\n    \"subtitles_config\": {\n      \"formats\": [\"srt\", \"vtt\"]\n    },\n    \"detect_language\": true,\n    \"enable_code_switching\": false\n}",
+        "options": {}
+      },
+      "id": "648538df-feb4-47ad-b984-0697ca447770",
+      "name": "Transcrever_audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2620,
+        780
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "sm3xKlgAz4xdemc9",
+          "name": "Gladia API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Switch1').item.json.message.chat.id }}",
+        "text": "={{ $json.result.transcription.full_transcript.isNotEmpty() ? $json.result.transcription.full_transcript : 'Não foi possivel transcrever seu audio, tente novamente'}}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "281a8506-67ae-4da4-9a0d-14bc3a5ae1cf",
+      "name": "Telegram2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3300,
+        640
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.gladia.io/v2/pre-recorded/{{$json.id}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "314d1bff-b6b6-43cd-9013-699755fecb0a",
+      "name": "get_transcricao",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2980,
+        800
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "sm3xKlgAz4xdemc9",
+          "name": "Gladia API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c41aa8df-7fc2-4c64-8ca9-bb57794aec03",
+              "leftValue": "={{ $json.completed_at }}",
+              "rightValue": "[null]",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "353d0937-c6ba-4bf6-8fae-8cb7d1287021",
+      "name": "If2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3100,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "565d9b8b-e1ae-48e5-b67b-49d7dde9227d",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2840,
+        800
+      ],
+      "webhookId": "4dc3fc3c-bc50-47e3-a4e1-88938e810612"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Switch1').item.json.message && $('Switch1').item.json.message.chat ? $('Switch1').item.json.message.chat.id : $('Switch1').item.json.callback_query.message.chat.id }}",
+        "text": "=Posso te ajudar em mais alguma coisa?",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Injetar texto no doc",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Injetar texto no doc"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Injetar texto e imagem no doc",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Injetar texto e imagem no doc"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Pegar notícias do g1 ",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Pegar notícias do g1"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Transcritor de audio",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Transcritor de áudio"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "07d4fde1-03b5-4df6-9e71-b1661e5cc276",
+      "name": "opcoes",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4440,
+        860
+      ],
+      "notesInFlow": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Switch1').item.json.message.chat.id }}",
+        "text": "=Olá {{ $('Switch').item.json.message.chat.first_name }}, aguarde um momento estamos transcrevendo seu texto",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c7b53f80-5d54-4d8b-a5e1-65daaf783e6b",
+      "name": "aguardar_transcricao",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2840,
+        640
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Switch1').item.json.message.chat.id }}",
+        "text": "=segue a abaixo o link do documento{{ $('copy_arquivo').item.json.id }}:\n\nhttps://docs.google.com/document/d/{{ $('copy_arquivo').item.json.id }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "8b4df83f-7007-4be7-9d85-7d3a6bb5af3d",
+      "name": "Telegram5",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3640,
+        1420
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "id": "38b34a53-5134-42c6-866a-d17f0f586618",
+      "name": "Telegram6",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3340,
+        1220
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://docs.google.com/document/d/{{ $('update_arquivo').item.json.documentId }}/export?format=pdf",
+        "options": {}
+      },
+      "id": "b2872e0a-c4b8-4cec-a0cf-91008ca53e8b",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3200,
+        1220
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "id": "88a3a1cc-a772-41aa-b951-22f816bf3fb5",
+      "name": "Telegram8",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3840,
+        900
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://docs.google.com/document/d/{{ $('update_doc').item.json.documentId }}/export?format=pdf",
+        "options": {}
+      },
+      "id": "368206b2-faff-41b2-a619-580195d2fc66",
+      "name": "HTTP Request2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3700,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "63449bb1-9c6e-45e1-9df9-ba120d0f1fe7",
+              "leftValue": "={{ $json.titulo_materia_capa }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "array",
+                "operation": "lengthEquals",
+                "rightType": "number"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8d94a2d8-3ec0-48a5-89b9-47243b5b6efd",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2820,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "12l6AyBP7fSxz-YI0LZ2KiarRtFZ592phVPdISuwZNp8",
+          "mode": "list",
+          "cachedResultName": "template_txt",
+          "cachedResultUrl": "https://docs.google.com/document/d/12l6AyBP7fSxz-YI0LZ2KiarRtFZ592phVPdISuwZNp8/edit?usp=drivesdk"
+        },
+        "name": "=template{{ $json.update_id }}",
+        "options": {}
+      },
+      "id": "6485753f-064d-4639-abdc-e2d277c68fb3",
+      "name": "copy_arquivo",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2460,
+        1320
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZU2OoozwDWKy0EJ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $('Switch').item.json.message.text }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "INJETEDOC "
+            }
+          ]
+        }
+      },
+      "id": "d63f07a0-ae1b-41b6-a477-9fcf816f1117",
+      "name": "update_arquivo",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        1320
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "iFlnKDKw6lyBigTg",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "10e7EP12kh5JZ9FT0QpFy0zG9pOxma-Zm5S3IvHzCNCs",
+          "mode": "list",
+          "cachedResultName": "template_img",
+          "cachedResultUrl": "https://docs.google.com/document/d/10e7EP12kh5JZ9FT0QpFy0zG9pOxma-Zm5S3IvHzCNCs/edit?usp=drivesdk"
+        },
+        "name": "=template{{ $json.update_id }}",
+        "options": {}
+      },
+      "id": "7721a4ce-341b-4734-ac6a-954abc7fafa0",
+      "name": "copy_doc",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2440,
+        1020
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZU2OoozwDWKy0EJ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice || $json.message.audio }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6bdc07b0-6149-4d51-aff8-f629c8ec283f",
+                    "leftValue": "={{ $json.message.caption }}",
+                    "rightValue": "INJETEDOC",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "57c4bb5b-b8be-4c44-98d1-aca38856ede0",
+                    "leftValue": "={{$json['message']['text']}}",
+                    "rightValue": "=INJETEDOC",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "a27adf8a-1694-47a8-bb2c-59d2dc7eb0a9",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1940,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Switch').item.json.message.photo.last().file_id }}"
+      },
+      "id": "d751fbfb-30b7-4c88-8216-08e605bfd640",
+      "name": "pegar_img",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2580,
+        1020
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $('copy_doc').item.json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "<<texto>>",
+              "replaceText": "={{ $('Switch').item.json.message.caption }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "INJETEDOC "
+            }
+          ]
+        }
+      },
+      "id": "5d3f07a6-5a91-4a7b-a9db-acfce40e0d48",
+      "name": "update_doc",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        1020
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "iFlnKDKw6lyBigTg",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const textoDoc = $json.content;\nconst textoParaBuscar = \"<<img>>\";\nlet index = -1;\n\nif (typeof textoDoc === 'string') {\n  index = textoDoc.indexOf(textoParaBuscar);\n}\n\nreturn { json: { index: index } };"
+      },
+      "id": "d4a41b6b-c387-4866-8578-9b129787b46b",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3000,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ $json.documentId }}"
+      },
+      "id": "919669c0-1695-45d7-aa99-019e06681d6d",
+      "name": "get_conteudo",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        1020
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "iFlnKDKw6lyBigTg",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $('update_doc').item.json.documentId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"<<img>>\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"\"\n      }\n    },\n    {\n      \"insertInlineImage\": {\n        \"location\": {\n          \"index\": {{ $json.index }}\n        },\n        \"uri\": \"https://api.telegram.org/file/bot7764363446:AAGxkyNZCJ9YRqjVd3jMQAMdNS8HBDRAfrs/{{ $('pegar_img').item.json.result.file_path }}\",\n        \"objectSize\": {\n          \"width\": {\n            \"magnitude\": 300,\n            \"unit\": \"PT\"\n          },\n          \"height\": {\n            \"magnitude\": 300,\n            \"unit\": \"PT\"\n          }\n        }\n      }\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "7bc0a80c-dc0d-4797-9d0f-a9250ae42d9f",
+      "name": "inserir_foto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3140,
+        1020
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "iFlnKDKw6lyBigTg",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "id": "efed75a2-c92f-478c-a8be-76c21bcfe344",
+      "name": "permission_anyone",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2740,
+        1320
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZU2OoozwDWKy0EJ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('update_doc').item.json.documentId }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "id": "7cc6e95e-5aee-4d07-a391-dfae3f877142",
+      "name": "permission",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3520,
+        1020
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZU2OoozwDWKy0EJ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Switch').item.json.message.chat.id }}",
+        "text": "=segue a abaixo o link do documento({{ $('copy_doc').item.json.id }}):\n\nhttps://docs.google.com/document/d/{{ $('copy_doc').item.json.id }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "284045d7-18eb-4c5c-8051-b84d20cc53a5",
+      "name": "send_link",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3740,
+        1120
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "43676a7a-8980-4850-b105-533bd988735d",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "@tk_assistente_bot Injetar texto no doc",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "=@tk_assistente_bot Injetar texto e imagem no doc",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dd8204d6-805e-40b7-990e-0c0a00d1f310",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "@tk_assistente_bot Pegar notícias do g1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e97fb8cb-8ed9-4812-86b7-4ca3a40d7ab0",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "@tk_assistente_bot Transcritor de áudio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "allMatchingOutputs": false
+        }
+      },
+      "id": "968c3554-9b25-4da3-9fd6-a623accf5c4a",
+      "name": "Switch1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1640,
+        460
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Switch1').item.json.message && $('Switch1').item.json.message.chat ? $('Switch1').item.json.message.chat.id : $('Switch1').item.json.callback_query.message.chat.id }}",
+        "text": "=Escolha uma dessas opções",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Injetar texto no doc",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Injetar texto no doc"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Injetar texto e imagem no doc",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Injetar texto e imagem no doc"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Pegar notícias do g1 ",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Pegar notícias do g1"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Transcritor de audio",
+                    "additionalFields": {
+                      "switch_inline_query_current_chat": "Transcritor de áudio"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "488c781b-5145-45bd-8932-b9d0081d4c17",
+      "name": "opcoes2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2480,
+        1520
+      ],
+      "notesInFlow": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Segue abaixo as noticias de capa do G1 e mais algumas atualizações:\n\n{{ $json.titulo_materia_capa[0] }}:\n{{ $json.link_materia_capa[0] }}\n\n{{ $json.titulo_materia_capa[1] }}:\n{{ $json.link_materia_capa[1] }}\n\n{{ $json.titulo_materia_capa[2] }}:\n{{ $json.link_materia_capa[2]}}\n\n{{ $json.titulo_materia[0] }}:\n{{ $json.link_materia[0] }}\n\n{{ $json.titulo_materia[1] }}:\n{{ $json.link_materia[1] }}\n\n{{ $json.titulo_materia[2] }}:\n{{ $json.link_materia[2] }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "60bef5a9-0eb6-4f07-9594-beb660617c36",
+      "name": "send_noticias",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3080,
+        380
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "Be5smrausVuGKfrg",
+          "name": "tk_bot"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "bemvindo_opcoes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "main": [
+        [
+          {
+            "node": "Transcrever_audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever_audio": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "aguardar_transcricao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_transcricao": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "get_transcricao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "opcoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Telegram6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram5": {
+      "main": [
+        [
+          {
+            "node": "opcoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Telegram8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "send_noticias",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "copy_arquivo": {
+      "main": [
+        [
+          {
+            "node": "update_arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_arquivo": {
+      "main": [
+        [
+          {
+            "node": "permission_anyone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "copy_doc": {
+      "main": [
+        [
+          {
+            "node": "pegar_img",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "copy_doc",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "copy_arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "opcoes2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pegar_img": {
+      "main": [
+        [
+          {
+            "node": "update_doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_doc": {
+      "main": [
+        [
+          {
+            "node": "get_conteudo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "inserir_foto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_conteudo": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir_foto": {
+      "main": [
+        [
+          {
+            "node": "permission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "permission_anyone": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "permission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "send_link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_link": {
+      "main": [
+        [
+          {
+            "node": "opcoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "pedir_texto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "pedir_txt_img",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "pedir_audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_noticias": {
+      "main": [
+        [
+          {
+            "node": "opcoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d91a8d45-882e-45a2-bb4e-1c6908d0b3fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "34e543d10bf988a9256a3afc29f4203f4f709f29cc6464a64a3c1601326d8e3d"
+  },
+  "id": "bVTC5bFH2W7SziUA",
+  "tags": []
+}
